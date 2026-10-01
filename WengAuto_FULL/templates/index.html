@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Автосалон WengAuto</h1>
+    <p>Новые и подержанные автомобили. Кредит, лизинг, Trade-in. Сервисный центр премиум-класса.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('website.catalog') }}" class="btn btn-primary">Смотреть каталог</a>
+      <a href="{{ url_for('website.credit') }}" class="btn btn-outline">Рассчитать кредит</a>
+    </div>
+  </div>
+</section>
+
+<div class="features">
+  <div class="feature">
+    <div class="icon">🚗</div>
+    <h3>Большой выбор</h3>
+    <p>Новые и с пробегом — проверенные авто</p>
+  </div>
+  <div class="feature">
+    <div class="icon">💳</div>
+    <h3>Кредит и лизинг</h3>
+    <p>Выгодные ставки, быстрое одобрение</p>
+  </div>
+  <div class="feature">
+    <div class="icon">🔄</div>
+    <h3>Trade-in</h3>
+    <p>Честная оценка вашего автомобиля</p>
+  </div>
+  <div class="feature">
+    <div class="icon">🔧</div>
+    <h3>Сервис 24/7</h3>
+    <p>Онлайн-запись на ТО и ремонт</p>
+  </div>
+</div>
+
+{% if promos %}
+<section>
+  <h2 class="section-title">🔥 Акции и спецпредложения</h2>
+  <div class="promo-grid">
+    {% for p in promos %}
+    <div class="promo-card">
+      <h3>{{ p.title }}</h3>
+      <p>{{ p.description }}</p>
+      {% if p.discount_percent %}<strong>Скидка {{ p.discount_percent }}%</strong>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section style="margin-top: 2.75rem;">
+  <h2 class="section-title">🚗 Популярные автомобили</h2>
+  <div class="cars-grid">
+    {% for car in cars %}
+    <a href="{{ url_for('website.car_detail', car_id=car.id) }}" class="car-card">
+      <div class="car-card-img">
+        <img src="{{ car.display_image }}" alt="{{ car.brand }} {{ car.model }}" loading="lazy"
+             onerror="this.src='/static/img/car-placeholder.jpg'">
+      </div>
+      <div class="car-card-body">
+        <span class="badge {% if car.is_new %}badge-new{% else %}badge-used{% endif %}">
+          {% if car.is_new %}Новый{% else %}С пробегом{% endif %}
+        </span>
+        <h3>{{ car.brand }} {{ car.model }}</h3>
+        <div class="meta">{{ car.year }} · {{ car.transmission }} · {{ car.body_type }}</div>
+        <div class="price">{{ "{:,.0f}".format(car.price).replace(",", " ") }} ₽</div>
+      </div>
+    </a>
+    {% else %}
+    <p>Автомобили временно отсутствуют.</p>
+    {% endfor %}
+  </div>
+  <p style="text-align:center; margin-top: 0.5rem;">
+    <a href="{{ url_for('website.catalog') }}" class="btn btn-primary">Весь каталог →</a>
+  </p>
+</section>
+
+<section style="margin-top: 3rem;">
+  <div class="form-card">
+    <h2 class="section-title" style="justify-content:center;">📞 Заказать обратный звонок</h2>
+    <form method="post" action="{{ url_for('website.create_lead') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="form_token" value="{{ form_token }}">
+      <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+        <input type="text" name="hp_field" tabindex="-1" autocomplete="off">
+      </div>
+      <input type="hidden" name="type" value="callback">
+      <div class="form-group">
+        <label>Ваше имя *</label>
+        <input type="text" name="name" required placeholder="Иван Иванов">
+      </div>
+      <div class="form-group">
+        <label>Телефон *</label>
+        <input type="tel" name="phone" required placeholder="+7 (999) 123-45-67">
+      </div>
+      <div class="form-group">
+        <label>Комментарий</label>
+        <textarea name="message" placeholder="Удобное время для звонка..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Жду звонка</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

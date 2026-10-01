@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Кредит и лизинг{% endblock %}
+{% block content %}
+<h1 class="section-title">Автокредит и лизинг</h1>
+<p style="margin-bottom: 1.5rem;">Рассчитайте ежемесячный платёж по аннуитетной схеме.</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; flex-wrap: wrap;">
+  <div class="form-card" style="max-width: none;">
+    <h2 style="margin-bottom: 1rem;">Калькулятор кредита</h2>
+    <div class="form-group">
+      <label>Стоимость автомобиля, ₽</label>
+      <input type="number" id="price" value="{{ request.args.get('price', 3000000) }}">
+    </div>
+    <div class="form-group">
+      <label>Первоначальный взнос, ₽</label>
+      <input type="number" id="down_payment" value="300000">
+    </div>
+    <div class="form-group">
+      <label>Срок, месяцев</label>
+      <input type="number" id="term_months" value="36">
+    </div>
+    <div class="form-group">
+      <label>Ставка, % годовых</label>
+      <input type="number" id="rate" value="12" step="0.1">
+    </div>
+    <button type="button" class="btn btn-primary btn-block" onclick="calcCredit()">Рассчитать</button>
+    <div id="calc-result" class="calc-result">
+      <p>Ежемесячный платёж: <span class="big" id="monthly">—</span> ₽</p>
+      <p>Сумма кредита: <span id="loan">—</span> ₽</p>
+      <p>Переплата: <span id="overpay">—</span> ₽</p>
+      <p>Всего к выплате: <span id="total">—</span> ₽</p>
+    </div>
+  </div>
+
+  <div class="form-card" style="max-width: none;">
+    <h2 style="margin-bottom: 1rem;">Заявка на кредит</h2>
+    <form method="post" action="{{ url_for('website.create_lead') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="form_token" value="{{ form_token }}">
+    <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+      <input type="text" name="hp_field" tabindex="-1" autocomplete="off">
+    </div>
+      <input type="hidden" name="type" value="credit">
+      <div class="form-group">
+        <label>Ваше имя *</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>Телефон *</label>
+        <input type="tel" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email">
+      </div>
+      <div class="form-group">
+        <label>Комментарий</label>
+        <textarea name="message" placeholder="Интересующий автомобиль, желаемый срок..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Отправить заявку</button>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/credit.js') }}"></script>
+{% endblock %}

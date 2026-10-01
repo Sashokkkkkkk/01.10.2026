@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Контакты{% endblock %}
+{% block content %}
+<h1 class="section-title">Контакты</h1>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+  <div style="background: var(--card-bg); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+    <p><strong>Адрес:</strong> г. Москва, ул. Автомобильная, д. 1</p>
+    <p style="margin-top: 0.75rem;"><strong>Телефон:</strong> +7 (495) 123-45-67</p>
+    <p style="margin-top: 0.75rem;"><strong>Email:</strong> info@wengauto.ru</p>
+    <p style="margin-top: 0.75rem;"><strong>Режим работы:</strong> Пн–Вс 9:00–21:00</p>
+    <p style="margin-top: 1.5rem; color: var(--text-muted);">Схема проезда доступна на картах.</p>
+  </div>
+  <div class="form-card" style="max-width: none;">
+    <h2 style="margin-bottom: 1rem;">Написать нам</h2>
+    <form method="post" action="{{ url_for('website.create_lead') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="form_token" value="{{ form_token }}">
+    <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+      <input type="text" name="hp_field" tabindex="-1" autocomplete="off">
+    </div>
+      <input type="hidden" name="type" value="callback">
+      <div class="form-group">
+        <label>Имя *</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>Телефон *</label>
+        <input type="tel" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label>Сообщение</label>
+        <textarea name="message"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Отправить</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

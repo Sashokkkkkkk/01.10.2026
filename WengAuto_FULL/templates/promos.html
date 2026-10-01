@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Акции{% endblock %}
+{% block content %}
+<h1 class="section-title">Акции и спецпредложения</h1>
+<div class="promo-grid">
+  {% for p in promos %}
+  <div class="promo-card">
+    <h3>{{ p.title }}</h3>
+    <p>{{ p.description }}</p>
+    {% if p.discount_percent %}<p><strong>Скидка {{ p.discount_percent }}%</strong></p>{% endif %}
+  </div>
+  {% else %}
+  <p>Активных акций пока нет.</p>
+  {% endfor %}
+</div>
+{% endblock %}

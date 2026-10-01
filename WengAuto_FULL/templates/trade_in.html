@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Trade-in{% endblock %}
+{% block content %}
+<h1 class="section-title">Trade-in — обмен вашего автомобиля</h1>
+<p style="margin-bottom: 1.5rem; max-width: 600px;">Оцените свой автомобиль и получите дополнительную выгоду при покупке нового. Оставьте заявку — наш специалист свяжется с вами.</p>
+<div class="form-card">
+  <form method="post" action="{{ url_for('website.create_lead') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="form_token" value="{{ form_token }}">
+    <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+      <input type="text" name="hp_field" tabindex="-1" autocomplete="off">
+    </div>
+    <input type="hidden" name="type" value="trade_in">
+    <div class="form-group">
+      <label>Ваше имя *</label>
+      <input type="text" name="name" required>
+    </div>
+    <div class="form-group">
+      <label>Телефон *</label>
+      <input type="tel" name="phone" required>
+    </div>
+    <div class="form-group">
+      <label>Опишите ваш автомобиль</label>
+      <textarea name="message" placeholder="Марка, модель, год, пробег, состояние..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Оставить заявку на оценку</button>
+  </form>
+</div>
+{% endblock %}

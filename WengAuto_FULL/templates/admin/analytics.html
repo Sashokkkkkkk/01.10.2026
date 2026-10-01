@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Аналитика{% endblock %}
+{% block content %}
+<h1 class="section-title">Аналитика и отчётность</h1>
+<p><a href="{{ url_for('admin.index') }}">← Админ</a></p>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="value">{{ "{:,.0f}".format(total_revenue).replace(",", " ") }}</div><div class="label">Выручка (продано), ₽</div></div>
+  <div class="stat-card"><div class="value">{{ clients_count }}</div><div class="label">Клиентов в базе</div></div>
+  <div class="stat-card"><div class="value">{{ cars_in_stock }}</div><div class="label">Авто в наличии</div></div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+  <div class="table-wrap">
+    <h3 style="padding: 1rem 1rem 0;">Продажи по маркам</h3>
+    <table>
+      <thead><tr><th>Марка</th><th>Кол-во</th></tr></thead>
+      <tbody>
+        {% for brand, cnt in sales_by_brand %}
+        <tr><td>{{ brand }}</td><td>{{ cnt }}</td></tr>
+        {% else %}<tr><td colspan="2">Нет данных</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3 style="padding: 1rem 1rem 0;">Заявки по типам</h3>
+    <table>
+      <thead><tr><th>Тип</th><th>Кол-во</th></tr></thead>
+      <tbody>
+        {% for t, cnt in leads_by_type %}
+        <tr><td>{{ t }}</td><td>{{ cnt }}</td></tr>
+        {% else %}<tr><td colspan="2">Нет данных</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3 style="padding: 1rem 1rem 0;">Сделки по этапам</h3>
+    <table>
+      <thead><tr><th>Этап</th><th>Кол-во</th></tr></thead>
+      <tbody>
+        {% for s, cnt in deals_by_stage %}
+        <tr><td>{{ s }}</td><td>{{ cnt }}</td></tr>
+        {% else %}<tr><td colspan="2">Нет данных</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
