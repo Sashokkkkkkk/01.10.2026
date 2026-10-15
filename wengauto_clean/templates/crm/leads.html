@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}CRM — Заявки{% endblock %}
+{% block content %}
+<h1 class="section-title">Заявки (лиды)</h1>
+<div class="side-nav" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+  <a href="{{ url_for('crm.leads') }}" class="{% if not current_status %}active{% endif %}">Все</a>
+  <a href="{{ url_for('crm.leads', status='new') }}" class="{% if current_status=='new' %}active{% endif %}">Новые</a>
+  <a href="{{ url_for('crm.leads', status='in_progress') }}">В работе</a>
+  <a href="{{ url_for('crm.leads', status='completed') }}">Завершённые</a>
+  <a href="{{ url_for('crm.dashboard') }}">← Дашборд</a>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Тип</th><th>Клиент</th><th>Телефон</th><th>Сообщение</th><th>Дата</th><th>Статус</th><th></th></tr></thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.id }}</td>
+        <td>{{ lead.type }}</td>
+        <td>{{ lead.client.full_name if lead.client else '—' }}</td>
+        <td>{{ lead.client.phone if lead.client else '—' }}</td>
+        <td>{{ (lead.message or '')[:60] }}</td>
+        <td>{{ lead.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td><span class="status-{{ lead.status }}">{{ lead.status }}</span></td>
+        <td>
+          <form method="post" action="{{ url_for('crm.update_lead', lead_id=lead.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="status" onchange="this.form.submit()">
+              <option value="new" {% if lead.status=='new' %}selected{% endif %}>new</option>
+              <option value="in_progress" {% if lead.status=='in_progress' %}selected{% endif %}>in_progress</option>
+              <option value="completed" {% if lead.status=='completed' %}selected{% endif %}>completed</option>
+              <option value="rejected" {% if lead.status=='rejected' %}selected{% endif %}>rejected</option>
+            </select>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">Заявок нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

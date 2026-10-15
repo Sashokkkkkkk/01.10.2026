@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}CRM — Дашборд{% endblock %}
+{% block content %}
+<h1 class="section-title">CRM · Дашборд</h1>
+<p style="margin-bottom: 1rem;">Пользователь: {{ current_user.full_name or current_user.username }} ({{ current_user.role }})</p>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="value">{{ leads_count }}</div><div class="label">Заявок всего</div></div>
+  <div class="stat-card"><div class="value">{{ clients_count }}</div><div class="label">Клиентов</div></div>
+  <div class="stat-card"><div class="value">{{ deals_count }}</div><div class="label">Сделок</div></div>
+  <div class="stat-card"><div class="value">{{ new_leads|length }}</div><div class="label">Новых заявок</div></div>
+</div>
+
+<div class="dashboard-grid">
+  <div>
+    <h2 class="section-title">Новые заявки</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Тип</th><th>Клиент</th><th>Дата</th><th>Статус</th><th></th></tr></thead>
+        <tbody>
+          {% for lead in new_leads %}
+          <tr>
+            <td>{{ lead.id }}</td>
+            <td>{{ lead.type }}</td>
+            <td>{{ lead.client.full_name if lead.client else '—' }}</td>
+            <td>{{ lead.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td><span class="status-{{ lead.status }}">{{ lead.status }}</span></td>
+            <td>
+              <form method="post" action="{{ url_for('crm.update_lead', lead_id=lead.id) }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <select name="status" onchange="this.form.submit()">
+                  <option value="new" {% if lead.status=='new' %}selected{% endif %}>new</option>
+                  <option value="in_progress">in_progress</option>
+                  <option value="completed">completed</option>
+                  <option value="rejected">rejected</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6">Новых заявок нет</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="side-nav">
+    <a href="{{ url_for('crm.dashboard') }}" class="active">Дашборд</a>
+    <a href="{{ url_for('crm.leads') }}">Все заявки</a>
+    <a href="{{ url_for('crm.clients') }}">Клиенты</a>
+    <a href="{{ url_for('crm.deals') }}">Сделки</a>
+    <a href="{{ url_for('crm.create_deal') }}">+ Новая сделка</a>
+    <a href="{{ url_for('warehouse.index') }}">Склад</a>
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('admin.index') }}">Администрирование</a>
+    <a href="{{ url_for('admin.analytics') }}">Аналитика</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

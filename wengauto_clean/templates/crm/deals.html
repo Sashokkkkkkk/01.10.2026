@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}CRM — Сделки{% endblock %}
+{% block content %}
+<h1 class="section-title">Воронка продаж · Сделки</h1>
+<p><a href="{{ url_for('crm.create_deal') }}" class="btn btn-primary btn-sm">+ Новая сделка</a>
+   <a href="{{ url_for('crm.dashboard') }}">← Дашборд</a></p>
+<div class="table-wrap" style="margin-top: 1rem;">
+  <table>
+    <thead><tr><th>ID</th><th>Клиент</th><th>Автомобиль</th><th>Этап</th><th>Сумма</th><th>Обновлено</th><th>Смена этапа</th></tr></thead>
+    <tbody>
+      {% for d in deals %}
+      <tr>
+        <td>{{ d.id }}</td>
+        <td>{{ d.client.full_name if d.client else '—' }}</td>
+        <td>{% if d.car %}{{ d.car.brand }} {{ d.car.model }}{% else %}—{% endif %}</td>
+        <td>{{ d.stage }}</td>
+        <td>{% if d.amount %}{{ "{:,.0f}".format(d.amount).replace(",", " ") }} ₽{% else %}—{% endif %}</td>
+        <td>{{ d.updated_at.strftime('%d.%m.%Y') }}</td>
+        <td>
+          <form method="post" action="{{ url_for('crm.update_deal_stage', deal_id=d.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="stage" onchange="this.form.submit()">
+              {% for s in ['lead','consultation','test_drive','agreement','contract','sold'] %}
+              <option value="{{ s }}" {% if d.stage==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">Сделок пока нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

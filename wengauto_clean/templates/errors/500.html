@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Ошибка 500{% endblock %}
+{% block content %}
+<div class="form-card" style="text-align:center;margin-top:3rem;">
+  <h1 style="font-size:3rem;color:var(--primary);">500</h1>
+  <p style="margin:1rem 0;">
+{% if code == '400' %}Некорректный запрос.
+{% elif code == '403' %}Доступ запрещён. Запрос похож на автоматизированный.
+{% elif code == '404' %}Страница не найдена.
+{% elif code == '429' %}Слишком много запросов. Подождите немного и обновите страницу.
+{% else %}Внутренняя ошибка сервера. Мы уже работаем над этим.
+{% endif %}
+  </p>
+  <a href="{{ url_for('website.index') }}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Новая сделка{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h1 class="section-title">Создать сделку</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label>Клиент *</label>
+      <select name="client_id" required>
+        <option value="">— выберите —</option>
+        {% for c in clients %}
+        <option value="{{ c.id }}">{{ c.full_name }} ({{ c.phone }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Автомобиль</label>
+      <select name="car_id">
+        <option value="">— не выбран —</option>
+        {% for car in cars %}
+        <option value="{{ car.id }}">{{ car.brand }} {{ car.model }} · {{ "{:,.0f}".format(car.price).replace(",", " ") }} ₽</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Этап</label>
+      <select name="stage">
+        <option value="lead">Лид</option>
+        <option value="consultation">Консультация</option>
+        <option value="test_drive">Тест-драйв</option>
+        <option value="agreement">Согласование</option>
+        <option value="contract">Договор</option>
+        <option value="sold">Продажа</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Сумма, ₽</label>
+      <input type="number" name="amount" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Заметки</label>
+      <textarea name="notes"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Создать</button>
+  </form>
+</div>
+{% endblock %}

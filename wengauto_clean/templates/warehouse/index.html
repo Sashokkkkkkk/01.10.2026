@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Склад / Автопарк{% endblock %}
+{% block content %}
+<h1 class="section-title">Склад / Автопарк</h1>
+<div class="stats-grid">
+  <div class="stat-card"><div class="value">{{ stats.in_stock }}</div><div class="label">В наличии</div></div>
+  <div class="stat-card"><div class="value">{{ stats.in_transit }}</div><div class="label">В пути</div></div>
+  <div class="stat-card"><div class="value">{{ stats.reserved }}</div><div class="label">Зарезервировано</div></div>
+  <div class="stat-card"><div class="value">{{ stats.sold }}</div><div class="label">Продано</div></div>
+</div>
+<p>
+  <a href="{{ url_for('warehouse.add_car') }}" class="btn btn-primary btn-sm">+ Добавить автомобиль</a>
+  <a href="{{ url_for('crm.dashboard') }}">← CRM</a>
+</p>
+<div class="side-nav" style="display:flex;gap:0.5rem;margin:1rem 0;flex-wrap:wrap;">
+  <a href="{{ url_for('warehouse.index') }}" class="{% if not current_status %}active{% endif %}">Все</a>
+  <a href="{{ url_for('warehouse.index', status='in_stock') }}">В наличии</a>
+  <a href="{{ url_for('warehouse.index', status='in_transit') }}">В пути</a>
+  <a href="{{ url_for('warehouse.index', status='reserved') }}">Резерв</a>
+  <a href="{{ url_for('warehouse.index', status='sold') }}">Продано</a>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>VIN</th><th>Марка / Модель</th><th>Год</th><th>Цена</th><th>Статус</th><th>На сайте</th><th></th></tr></thead>
+    <tbody>
+      {% for car in cars %}
+      <tr>
+        <td><code>{{ car.vin }}</code></td>
+        <td>{{ car.brand }} {{ car.model }}</td>
+        <td>{{ car.year }}</td>
+        <td>{{ "{:,.0f}".format(car.price).replace(",", " ") }} ₽</td>
+        <td><span class="status-{{ car.status }}">{{ car.status }}</span></td>
+        <td>{% if car.published %}Да{% else %}Нет{% endif %}</td>
+        <td><a href="{{ url_for('warehouse.edit_car', car_id=car.id) }}">Изменить</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">Автомобилей нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

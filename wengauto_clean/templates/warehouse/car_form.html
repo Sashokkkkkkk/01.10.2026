@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{% if car %}Редактирование{% else %}Добавление{% endif %} автомобиля{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width: 640px;">
+  <h1 class="section-title">{% if car %}Редактировать{% else %}Добавить{% endif %} автомобиль</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if not car %}
+    <div class="form-group">
+      <label>VIN *</label>
+      <input type="text" name="vin" required maxlength="17" placeholder="17 символов">
+    </div>
+    {% endif %}
+    <div class="form-group">
+      <label>Марка *</label>
+      <input type="text" name="brand" value="{{ car.brand if car else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label>Модель *</label>
+      <input type="text" name="model" value="{{ car.model if car else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label>Год *</label>
+      <input type="number" name="year" value="{{ car.year if car else 2024 }}" required>
+    </div>
+    <div class="form-group">
+      <label>Цена, ₽ *</label>
+      <input type="number" name="price" value="{{ car.price if car else '' }}" required step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Тип кузова</label>
+      <select name="body_type">
+        {% for t in ['седан','кроссовер','хэтчбек','универсал','внедорожник','купе'] %}
+        <option value="{{ t }}" {% if car and car.body_type==t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>КПП</label>
+      <select name="transmission">
+        <option value="АКПП" {% if car and car.transmission=='АКПП' %}selected{% endif %}>АКПП</option>
+        <option value="МКПП" {% if car and car.transmission=='МКПП' %}selected{% endif %}>МКПП</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Привод</label>
+      <select name="drive">
+        <option value="передний" {% if car and car.drive=='передний' %}selected{% endif %}>передний</option>
+        <option value="задний" {% if car and car.drive=='задний' %}selected{% endif %}>задний</option>
+        <option value="полный" {% if car and car.drive=='полный' %}selected{% endif %}>полный</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Двигатель</label>
+      <input type="text" name="engine" value="{{ car.engine if car else '' }}">
+    </div>
+    <div class="form-group">
+      <label>Мощность, л.с.</label>
+      <input type="number" name="power_hp" value="{{ car.power_hp if car else '' }}">
+    </div>
+    <div class="form-group">
+      <label>Цвет кузова</label>
+      <input type="text" name="color_body" value="{{ car.color_body if car else '' }}">
+    </div>
+    <div class="form-group">
+      <label>Цвет салона</label>
+      <input type="text" name="color_interior" value="{{ car.color_interior if car else '' }}">
+    </div>
+    <div class="form-group">
+      <label>Пробег, км</label>
+      <input type="number" name="mileage" value="{{ car.mileage if car else 0 }}">
+    </div>
+    <div class="form-group">
+      <label>Новый?</label>
+      <select name="is_new">
+        <option value="1" {% if not car or car.is_new %}selected{% endif %}>Да</option>
+        <option value="0" {% if car and not car.is_new %}selected{% endif %}>Нет</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Статус</label>
+      <select name="status">
+        {% for s in ['in_stock','in_transit','reserved','sold'] %}
+        <option value="{{ s }}" {% if car and car.status==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Публиковать на сайте</label>
+      <select name="published">
+        <option value="1" {% if not car or car.published %}selected{% endif %}>Да</option>
+        <option value="0" {% if car and not car.published %}selected{% endif %}>Нет</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>URL изображения</label>
+      <input type="text" name="image_url" value="{{ car.image_url if car else '' }}">
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <textarea name="description">{{ car.description if car else '' }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Сохранить</button>
+  </form>
+</div>
+{% endblock %}
