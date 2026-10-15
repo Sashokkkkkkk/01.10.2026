@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Каталог автомобилей{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Каталог автомобилей</h1>
+
+<form class="filters" method="get" action="{{ url_for('website.catalog') }}">
+  <div>
+    <label>Марка</label>
+    <select name="brand">
+      <option value="">Все</option>
+      {% for b in brands %}
+      <option value="{{ b[0] }}" {% if filters.get('brand') == b[0] %}selected{% endif %}>{{ b[0] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Тип кузова</label>
+    <select name="body_type">
+      <option value="">Все</option>
+      {% for bt in body_types if bt[0] %}
+      <option value="{{ bt[0] }}" {% if filters.get('body_type') == bt[0] %}selected{% endif %}>{{ bt[0] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>КПП</label>
+    <select name="transmission">
+      <option value="">Любая</option>
+      <option value="АКПП" {% if filters.get('transmission') == 'АКПП' %}selected{% endif %}>АКПП</option>
+      <option value="МКПП" {% if filters.get('transmission') == 'МКПП' %}selected{% endif %}>МКПП</option>
+    </select>
+  </div>
+  <div>
+    <label>Состояние</label>
+    <select name="is_new">
+      <option value="">Все</option>
+      <option value="1" {% if filters.get('is_new') == '1' %}selected{% endif %}>Новые</option>
+      <option value="0" {% if filters.get('is_new') == '0' %}selected{% endif %}>С пробегом</option>
+    </select>
+  </div>
+  <div>
+    <label>Цена от</label>
+    <input type="number" name="price_min" value="{{ filters.get('price_min', '') }}" placeholder="0">
+  </div>
+  <div>
+    <label>Цена до</label>
+    <input type="number" name="price_max" value="{{ filters.get('price_max', '') }}" placeholder="10000000">
+  </div>
+  <div>
+    <label>Год от</label>
+    <input type="number" name="year_min" value="{{ filters.get('year_min', '') }}" placeholder="2018">
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary">Применить</button>
+  </div>
+</form>
+
+<p style="color: var(--muted); margin-bottom: 1rem; font-weight: 600;">Найдено: {{ cars|length }} авт.</p>
+
+<div class="cars-grid">
+  {% for car in cars %}
+  <a href="{{ url_for('website.car_detail', car_id=car.id) }}" class="car-card">
+    <div class="car-card-img">
+      <img src="{{ car.display_image }}" alt="{{ car.brand }} {{ car.model }}" loading="lazy"
+           onerror="this.src='/static/img/car-placeholder.jpg'">
+    </div>
+    <div class="car-card-body">
+      <span class="badge {% if car.is_new %}badge-new{% else %}badge-used{% endif %}">
+        {% if car.is_new %}Новый{% else %}С пробегом · {{ car.mileage }} км{% endif %}
+      </span>
+      <h3>{{ car.brand }} {{ car.model }}</h3>
+      <div class="meta">{{ car.year }} · {{ car.transmission }} · {{ car.drive }} · {{ car.color_body }}</div>
+      <div class="price">{{ "{:,.0f}".format(car.price).replace(",", " ") }} ₽</div>
+    </div>
+  </a>
+  {% else %}
+  <p>По выбранным фильтрам автомобилей не найдено.</p>
+  {% endfor %}
+</div>
+{% endblock %}

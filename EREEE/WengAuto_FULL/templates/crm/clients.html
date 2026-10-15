@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}CRM — Клиенты{% endblock %}
+{% block content %}
+<h1 class="section-title">Клиенты</h1>
+<p><a href="{{ url_for('crm.dashboard') }}">← Дашборд</a></p>
+<div class="table-wrap" style="margin-top: 1rem;">
+  <table>
+    <thead><tr><th>ID</th><th>ФИО</th><th>Телефон</th><th>Email</th><th>Источник</th><th>Дата</th></tr></thead>
+    <tbody>
+      {% for c in clients %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.full_name }}</td>
+        <td>{{ c.phone or '—' }}</td>
+        <td>{{ c.email or '—' }}</td>
+        <td>{{ c.source or '—' }}</td>
+        <td>{{ c.created_at.strftime('%d.%m.%Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Клиентов пока нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
