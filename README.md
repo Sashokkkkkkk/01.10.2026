@@ -1,7 +1,15 @@
 # WengAuto — АИС автосалона
 
 Учебный прототип автоматизированной информационной системы для автосалона **WengAuto**.
-
+    MAIL_ENABLED=1
+MAIL_SERVER=smtp.mail.ru
+MAIL_PORT=465
+MAIL_USE_SSL=1
+MAIL_USE_TLS=0
+MAIL_USERNAME=ваша_почта@mail.ru
+MAIL_PASSWORD=вставьте_пароль_приложения
+MAIL_DEFAULT_SENDER=WengAuto <ваша_почта@mail.ru>
+MAIL_MANAGER=ваша_почта@mail.ru
 Публичный сайт, CRM, склад автомобилей, сервис и панель администратора на **Flask**.
 
 ---
