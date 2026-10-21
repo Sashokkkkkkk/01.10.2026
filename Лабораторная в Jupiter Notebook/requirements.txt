@@ -1,0 +1,3 @@
+jupyterlab
+notebook
+scikit-learn
