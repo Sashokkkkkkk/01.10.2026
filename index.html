@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ИС «Учёт техники» — ПОЧУ «ИТЭУП УПС»</title>
+  <style>
+    :root {
+      --primary: #1a5276;
+      --primary-dark: #0e3a57;
+      --accent: #2980b9;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #c0392b;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --muted: #7f8c8d;
+      --border: #dce1e6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    /* LOGIN */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a5276 0%, #2980b9 50%, #3498db 100%);
+    }
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-card .logo {
+      width: 72px; height: 72px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px; color: white;
+    }
+    .login-card h1 { font-size: 22px; margin-bottom: 6px; color: var(--primary-dark); }
+    .login-card .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 14px; transition: border 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 22px; border: none; border-radius: 8px; font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #219a52; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-outline { background: white; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+    .error-msg { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 18px; }
+    
+    /* APP LAYOUT */
+    #app { display: none; min-height: 100vh; }
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+      background: var(--primary-dark); color: white; display: flex; flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar .brand {
+      padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sidebar .brand .icon {
+      width: 40px; height: 40px; background: rgba(255,255,255,0.15);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .sidebar .brand h2 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+    .sidebar .brand span { font-size: 11px; opacity: 0.7; }
+    .nav { flex: 1; padding: 16px 12px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
+      margin-bottom: 4px; transition: background 0.15s; color: rgba(255,255,255,0.85);
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.12); color: white; }
+    .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+    .sidebar .user-info {
+      padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 13px;
+    }
+    .sidebar .user-info .name { font-weight: 600; }
+    .sidebar .user-info .role { opacity: 0.7; font-size: 12px; }
+    
+    .main { margin-left: 240px; min-height: 100vh; }
+    .topbar {
+      background: white; padding: 16px 28px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar h1 { font-size: 20px; font-weight: 700; }
+    .topbar .actions { display: flex; gap: 10px; }
+    .content { padding: 24px 28px; }
+    
+    /* CARDS & STATS */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border);
+    }
+    .stat-card .label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+    .stat-card .value.green { color: var(--success); }
+    .stat-card .value.orange { color: var(--warning); }
+    .stat-card .value.red { color: var(--danger); }
+    
+    /* TABLE */
+    .card {
+      background: white; border-radius: 12px; border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h3 { font-size: 16px; font-weight: 600; }
+    .card-body { padding: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .badge-green { background: #d5f5e3; color: #1e8449; }
+    .badge-orange { background: #fdebd0; color: #b9770e; }
+    .badge-red { background: #fadbd8; color: #922b21; }
+    .badge-blue { background: #d6eaf8; color: #1a5276; }
+    
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white; border-radius: 14px; width: 520px; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 18px; }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    
+    /* REPORTS */
+    .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .report-card {
+      background: white; border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; cursor: pointer; transition: all 0.2s;
+    }
+    .report-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .report-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .report-card h4 { font-size: 15px; margin-bottom: 6px; }
+    .report-card p { font-size: 13px; color: var(--muted); }
+    
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 16px;
+    }
+    .search-bar input {
+      flex: 1; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 14px;
+    }
+    
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: var(--primary-dark);
+      color: white; padding: 14px 22px; border-radius: 10px; font-size: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 300;
+      transform: translateY(100px); opacity: 0; transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="logo">💻</div>
+      <h1>ИС «Учёт техники»</h1>
+      <div class="subtitle">ПОЧУ «Ижевский техникум экономики,<br>управления и права Удмуртпотребсоюза»</div>
+      <div class="form-group">
+        <label>Логин</label>
+        <input type="text" id="login-user" value="admin" placeholder="Введите логин">
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" id="login-pass" value="admin" placeholder="Введите пароль">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Войти в систему</button>
+      <div class="error-msg" id="login-error">Неверный логин или пароль</div>
+      <div class="hint">Демо: admin / admin &nbsp;|&nbsp; operator / operator</div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app">
+    <div class="sidebar">
+      <div class="brand">
+        <div class="icon">💻</div>
+        <div>
+          <h2>Учёт техники</h2>
+          <span>ИС УТ v1.0</span>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+          <span class="icon">📊</span> Главная
+        </div>
+        <div class="nav-item" data-page="tech" onclick="showPage('tech')">
+          <span class="icon">🖥️</span> Реестр техники
+        </div>
+        <div class="nav-item" data-page="moves" onclick="showPage('moves')">
+          <span class="icon">🔄</span> Перемещения
+        </div>
+        <div class="nav-item" data-page="repairs" onclick="showPage('repairs')">
+          <span class="icon">🔧</span> Ремонты
+        </div>
+        <div class="nav-item" data-page="reports" onclick="showPage('reports')">
+          <span class="icon">📋</span> Отчёты
+        </div>
+        <div class="nav-item" data-page="admin" onclick="showPage('admin')">
+          <span class="icon">⚙️</span> Администрирование
+        </div>
+      </div>
+      <div class="user-info">
+        <div class="name" id="user-name">Администратор</div>
+        <div class="role" id="user-role">Роль: Администратор</div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%;color:#333" onclick="doLogout()">Выйти</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <h1 id="page-title">Главная панель</h1>
+        <div class="actions" id="page-actions"></div>
+      </div>
+      <div class="content" id="page-content"></div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Заголовок</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============ DATA ============
+    const TYPES = ['ПК', 'Ноутбук', 'Принтер', 'МФУ', 'Проектор', 'Монитор', 'Сервер', 'Коммутатор'];
+    const ROOMS = [
+      {id:1, num:'101', name:'Компьютерный класс №1'},
+      {id:2, num:'102', name:'Компьютерный класс №2'},
+      {id:3, num:'205', name:'Лаборатория сетей'},
+      {id:4, num:'301', name:'Аудитория информатики'},
+      {id:5, num:'15', name:'Серверная'},
+      {id:6, num:'66', name:'Бухгалтерия'},
+      {id:7, num:'Адм', name:'Администрация'}
+    ];
+    const MOLS = [
+      {id:1, fio:'Иванов П.С.', post:'Системный администратор'},
+      {id:2, fio:'Петрова А.В.', post:'Зав. кабинетом 101'},
+      {id:3, fio:'Сидоров К.М.', post:'Зав. кабинетом 102'},
+      {id:4, fio:'Кузнецова Е.И.', post:'Зав. лабораторией'}
+    ];
+
+    let currentUser = null;
+    let tech = [];
+    let moves = [];
+    let repairs = [];
+    let nextId = 1;
+
+    function initData() {
+      if (localStorage.getItem('is_ut_tech')) {
+        tech = JSON.parse(localStorage.getItem('is_ut_tech'));
+        moves = JSON.parse(localStorage.getItem('is_ut_moves') || '[]');
+        repairs = JSON.parse(localStorage.getItem('is_ut_repairs') || '[]');
+        nextId = Math.max(...tech.map(t => t.id), 0) + 1;
+        return;
+      }
+      // Seed data
+      const seed = [
+        {type:'ПК', model:'Dell OptiPlex 7090', serial:'DL7090-001', date:'2024-03-15', price:52000, room:1, mol:2, status:'В работе'},
+        {type:'ПК', model:'Dell OptiPlex 7090', serial:'DL7090-002', date:'2024-03-15', price:52000, room:1, mol:2, status:'В работе'},
+        {type:'ПК', model:'HP ProDesk 400 G7', serial:'HP400-015', date:'2023-09-01', price:48000, room:2, mol:3, status:'В работе'},
+        {type:'Ноутбук', model:'Lenovo ThinkPad E15', serial:'LN-E15-088', date:'2025-01-20', price:65000, room:3, mol:4, status:'В работе'},
+        {type:'Ноутбук', model:'ASUS VivoBook 15', serial:'AS-VB15-012', date:'2024-11-10', price:42000, room:4, mol:1, status:'В ремонте'},
+        {type:'Принтер', model:'HP LaserJet Pro M404dn', serial:'HP-M404-003', date:'2023-05-12', price:28000, room:6, mol:1, status:'В работе'},
+        {type:'МФУ', model:'Kyocera ECOSYS M2040dn', serial:'KY-M2040-001', date:'2022-08-30', price:35000, room:7, mol:1, status:'В работе'},
+        {type:'Проектор', model:'Epson EB-X51', serial:'EP-X51-007', date:'2024-02-14', price:45000, room:4, mol:4, status:'В работе'},
+        {type:'Монитор', model:'Dell P2422H 24"', serial:'DL-P2422-021', date:'2024-03-15', price:18000, room:1, mol:2, status:'В работе'},
+        {type:'Сервер', model:'HP ProLiant DL380 Gen10', serial:'HP-DL380-001', date:'2021-11-05', price:280000, room:5, mol:1, status:'В работе'},
+        {type:'Коммутатор', model:'Cisco Catalyst 2960', serial:'CS-2960-002', date:'2022-04-18', price:95000, room:5, mol:1, status:'В работе'},
+        {type:'ПК', model:'Acer Veriton X2665G', serial:'AC-X2665-009', date:'2020-06-22', price:38000, room:2, mol:3, status:'Списан'}
+      ];
+      tech = seed.map((s, i) => ({
+        id: i + 1,
+        inv: genInv(s.type, s.date, i + 1),
+        ...s
+      }));
+      nextId = tech.length + 1;
+      moves = [
+        {id:1, techId:4, date:'2025-06-10', from:4, to:3, basis:'Приказ №45-од', who:'Иванов П.С.'},
+        {id:2, techId:8, date:'2025-09-01', from:1, to:4, basis:'Акт перемещения №12', who:'Кузнецова Е.И.'}
+      ];
+      repairs = [
+        {id:1, techId:5, start:'2026-09-15', end:'', desc:'Не включается, подозрение на блок питания', cost:0, who:'Сервисный центр «ТехноСервис»', status:'В работе'},
+        {id:2, techId:6, start:'2025-11-20', end:'2025-11-25', desc:'Замена термоплёнки', cost:3500, who:'Иванов П.С.', status:'Завершён'}
+      ];
+      saveData();
+    }
+
+    function genInv(type, date, num) {
+      const codes = {'ПК':'ПК','Ноутбук':'НБ','Принтер':'ПР','МФУ':'МФ','Проектор':'ПЖ','Монитор':'МН','Сервер':'СР','Коммутатор':'КМ'};
+      const year = (date || '2026').substring(0,4);
+      return `${codes[type] || 'ТХ'}-${year}-${String(num).padStart(4,'0')}`;
+    }
+
+    function saveData() {
+      localStorage.setItem('is_ut_tech', JSON.stringify(tech));
+      localStorage.setItem('is_ut_moves', JSON.stringify(moves));
+      localStorage.setItem('is_ut_repairs', JSON.stringify(repairs));
+    }
+
+    function roomName(id) {
+      const r = ROOMS.find(x => x.id === id);
+      return r ? `${r.num} — ${r.name}` : '—';
+    }
+    function molName(id) {
+      const m = MOLS.find(x => x.id === id);
+      return m ? m.fio : '—';
+    }
+    function techById(id) { return tech.find(t => t.id === id); }
+
+    // ============ AUTH ============
+    function doLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value;
+      if ((u === 'admin' && p === 'admin') || (u === 'operator' && p === 'operator')) {
+        currentUser = {login: u, name: u === 'admin' ? 'Администратор системы' : 'Оператор учёта', role: u === 'admin' ? 'Администратор' : 'Оператор'};
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('user-name').textContent = currentUser.name;
+        document.getElementById('user-role').textContent = 'Роль: ' + currentUser.role;
+        initData();
+        showPage('dashboard');
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+    function doLogout() {
+      currentUser = null;
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-error').style.display = 'none';
+    }
+
+    // ============ NAVIGATION ============
+    function showPage(page) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+      const titles = {dashboard:'Главная панель', tech:'Реестр техники', moves:'Перемещения', repairs:'Ремонты', reports:'Отчёты', admin:'Администрирование'};
+      document.getElementById('page-title').textContent = titles[page] || page;
+      const actions = document.getElementById('page-actions');
+      actions.innerHTML = '';
+      if (page === 'tech') {
+        actions.innerHTML = `<button class="btn btn-success btn-sm" onclick="openAddTech()">+ Добавить технику</button>`;
+      }
+      if (page === 'moves') {
+        actions.innerHTML = `<button class="btn btn-success btn-sm" onclick="openAddMove()">+ Оформить перемещение</button>`;
+      }
+      if (page === 'repairs') {
+        actions.innerHTML = `<button class="btn btn-success btn-sm" onclick="openAddRepair()">+ Заявка на ремонт</button>`;
+      }
+      const content = document.getElementById('page-content');
+      if (page === 'dashboard') content.innerHTML = renderDashboard();
+      else if (page === 'tech') content.innerHTML = renderTech();
+      else if (page === 'moves') content.innerHTML = renderMoves();
+      else if (page === 'repairs') content.innerHTML = renderRepairs();
+      else if (page === 'reports') content.innerHTML = renderReports();
+      else if (page === 'admin') content.innerHTML = renderAdmin();
+    }
+
+    // ============ RENDERERS ============
+    function renderDashboard() {
+      const total = tech.length;
+      const work = tech.filter(t => t.status === 'В работе').length;
+      const repair = tech.filter(t => t.status === 'В ремонте').length;
+      const written = tech.filter(t => t.status === 'Списан').length;
+      const totalCost = tech.filter(t => t.status !== 'Списан').reduce((s,t) => s + (t.price||0), 0);
+      return `
+        <div class="stats">
+          <div class="stat-card"><div class="label">Всего единиц</div><div class="value">${total}</div></div>
+          <div class="stat-card"><div class="label">В работе</div><div class="value green">${work}</div></div>
+          <div class="stat-card"><div class="label">В ремонте</div><div class="value orange">${repair}</div></div>
+          <div class="stat-card"><div class="label">Списано</div><div class="value red">${written}</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat-card" style="grid-column:span 2"><div class="label">Балансовая стоимость (в работе + ремонт)</div><div class="value">${totalCost.toLocaleString('ru-RU')} ₽</div></div>
+          <div class="stat-card"><div class="label">Перемещений</div><div class="value">${moves.length}</div></div>
+          <div class="stat-card"><div class="label">Ремонтов</div><div class="value">${repairs.length}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Последние единицы техники</h3></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Инв. №</th><th>Тип</th><th>Модель</th><th>Кабинет</th><th>Статус</th></tr></thead>
+              <tbody>
+                ${tech.slice(-5).reverse().map(t => `
+                  <tr>
+                    <td><b>${t.inv}</b></td>
+                    <td>${t.type}</td>
+                    <td>${t.model}</td>
+                    <td>${roomName(t.room)}</td>
+                    <td>${statusBadge(t.status)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function statusBadge(s) {
+      const cls = s === 'В работе' ? 'badge-green' : s === 'В ремонте' ? 'badge-orange' : 'badge-red';
+      return `<span class="badge ${cls}">${s}</span>`;
+    }
+
+    function renderTech() {
+      return `
+        <div class="search-bar">
+          <input type="text" id="tech-search" placeholder="Поиск по инвентарному номеру, модели, серийному номеру..." oninput="filterTech()">
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Реестр техники (${tech.length})</h3></div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Инв. №</th><th>Тип</th><th>Модель</th><th>Серийный №</th>
+                  <th>Кабинет</th><th>МОЛ</th><th>Статус</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="tech-tbody">
+                ${techRows(tech)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+    function techRows(list) {
+      return list.map(t => `
+        <tr>
+          <td><b>${t.inv}</b></td>
+          <td>${t.type}</td>
+          <td>${t.model}</td>
+          <td>${t.serial}</td>
+          <td>${roomName(t.room)}</td>
+          <td>${molName(t.mol)}</td>
+          <td>${statusBadge(t.status)}</td>
+          <td>
+            <button class="btn btn-outline btn-sm" onclick="viewTech(${t.id})">👁</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    function filterTech() {
+      const q = document.getElementById('tech-search').value.toLowerCase();
+      const filtered = tech.filter(t =>
+        t.inv.toLowerCase().includes(q) || t.model.toLowerCase().includes(q) ||
+        t.serial.toLowerCase().includes(q) || t.type.toLowerCase().includes(q)
+      );
+      document.getElementById('tech-tbody').innerHTML = techRows(filtered);
+    }
+
+    function renderMoves() {
+      return `
+        <div class="card">
+          <div class="card-header"><h3>История перемещений (${moves.length})</h3></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Дата</th><th>Техника</th><th>Откуда</th><th>Куда</th><th>Основание</th><th>Ответственный</th></tr></thead>
+              <tbody>
+                ${moves.map(m => {
+                  const t = techById(m.techId);
+                  return `<tr>
+                    <td>${m.date}</td>
+                    <td><b>${t ? t.inv : '—'}</b> ${t ? t.model : ''}</td>
+                    <td>${roomName(m.from)}</td>
+                    <td>${roomName(m.to)}</td>
+                    <td>${m.basis}</td>
+                    <td>${m.who}</td>
+                  </tr>`;
+                }).join('') || '<tr><td colspan="6" class="empty-state">Нет записей о перемещениях</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRepairs() {
+      return `
+        <div class="card">
+          <div class="card-header"><h3>Ремонты и обслуживание (${repairs.length})</h3></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Техника</th><th>Начало</th><th>Окончание</th><th>Описание</th><th>Стоимость</th><th>Исполнитель</th><th>Статус</th></tr></thead>
+              <tbody>
+                ${repairs.map(r => {
+                  const t = techById(r.techId);
+                  return `<tr>
+                    <td><b>${t ? t.inv : '—'}</b></td>
+                    <td>${r.start}</td>
+                    <td>${r.end || '—'}</td>
+                    <td>${r.desc}</td>
+                    <td>${r.cost ? r.cost.toLocaleString('ru-RU') + ' ₽' : '—'}</td>
+                    <td>${r.who}</td>
+                    <td>${r.status === 'Завершён' ? statusBadge('В работе').replace('В работе','Завершён') : statusBadge('В ремонте')}</td>
+                  </tr>`;
+                }).join('') || '<tr><td colspan="7" class="empty-state">Нет записей о ремонтах</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderReports() {
+      return `
+        <div class="report-grid">
+          <div class="report-card" onclick="runReport('byRoom')">
+            <div class="icon">🏫</div>
+            <h4>Ведомость по кабинетам</h4>
+            <p>Наличие техники в разрезе помещений</p>
+          </div>
+          <div class="report-card" onclick="runReport('byStatus')">
+            <div class="icon">📊</div>
+            <h4>Сводка по статусам</h4>
+            <p>Количество единиц в работе, ремонте, списанных</p>
+          </div>
+          <div class="report-card" onclick="runReport('warranty')">
+            <div class="icon">⏰</div>
+            <h4>Техника старше 3 лет</h4>
+            <p>Кандидаты на списание / замену</p>
+          </div>
+          <div class="report-card" onclick="runReport('cost')">
+            <div class="icon">💰</div>
+            <h4>Сводка по стоимости</h4>
+            <p>Балансовая стоимость по типам техники</p>
+          </div>
+        </div>
+        <div id="report-result" style="margin-top:24px"></div>
+      `;
+    }
+
+    function runReport(type) {
+      let html = '';
+      if (type === 'byRoom') {
+        html = `<div class="card"><div class="card-header"><h3>Ведомость наличия техники по кабинетам</h3></div><div class="card-body"><table>
+          <thead><tr><th>Кабинет</th><th>Кол-во</th><th>Техника</th></tr></thead><tbody>
+          ${ROOMS.map(r => {
+            const items = tech.filter(t => t.room === r.id && t.status !== 'Списан');
+            return `<tr><td><b>${r.num}</b> — ${r.name}</td><td>${items.length}</td>
+              <td>${items.map(t => t.inv + ' (' + t.type + ')').join(', ') || '—'}</td></tr>`;
+          }).join('')}
+          </tbody></table></div></div>`;
+      } else if (type === 'byStatus') {
+        const counts = {};
+        tech.forEach(t => { counts[t.status] = (counts[t.status]||0)+1; });
+        html = `<div class="card"><div class="card-header"><h3>Сводка по статусам</h3></div><div class="card-body"><table>
+          <thead><tr><th>Статус</th><th>Количество</th></tr></thead><tbody>
+          ${Object.entries(counts).map(([s,c]) => `<tr><td>${statusBadge(s)}</td><td><b>${c}</b></td></tr>`).join('')}
+          </tbody></table></div></div>`;
+      } else if (type === 'warranty') {
+        const old = tech.filter(t => {
+          const y = parseInt((t.date||'2026').substring(0,4));
+          return y <= 2023 && t.status !== 'Списан';
+        });
+        html = `<div class="card"><div class="card-header"><h3>Техника старше 3 лет (${old.length})</h3></div><div class="card-body"><table>
+          <thead><tr><th>Инв. №</th><th>Модель</th><th>Год</th><th>Кабинет</th></tr></thead><tbody>
+          ${old.map(t => `<tr><td><b>${t.inv}</b></td><td>${t.model}</td><td>${t.date.substring(0,4)}</td><td>${roomName(t.room)}</td></tr>`).join('') || '<tr><td colspan="4">Нет данных</td></tr>'}
+          </tbody></table></div></div>`;
+      } else if (type === 'cost') {
+        const byType = {};
+        tech.filter(t => t.status !== 'Списан').forEach(t => {
+          byType[t.type] = (byType[t.type]||0) + (t.price||0);
+        });
+        html = `<div class="card"><div class="card-header"><h3>Стоимость по типам техники</h3></div><div class="card-body"><table>
+          <thead><tr><th>Тип</th><th>Сумма</th></tr></thead><tbody>
+          ${Object.entries(byType).map(([t,s]) => `<tr><td>${t}</td><td><b>${s.toLocaleString('ru-RU')} ₽</b></td></tr>`).join('')}
+          <tr><td><b>ИТОГО</b></td><td><b>${Object.values(byType).reduce((a,b)=>a+b,0).toLocaleString('ru-RU')} ₽</b></td></tr>
+          </tbody></table></div></div>`;
+      }
+      document.getElementById('report-result').innerHTML = html;
+    }
+
+    function renderAdmin() {
+      return `
+        <div class="stats">
+          <div class="stat-card"><div class="label">Пользователи</div><div class="value">2</div></div>
+          <div class="stat-card"><div class="label">Роли</div><div class="value">3</div></div>
+          <div class="stat-card"><div class="label">Размер БД</div><div class="value" style="font-size:18px">~45 КБ</div></div>
+          <div class="stat-card"><div class="label">Последний бэкап</div><div class="value" style="font-size:16px">Сегодня</div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><h3>Пользователи системы</h3></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Логин</th><th>Имя</th><th>Роль</th><th>Статус</th></tr></thead>
+              <tbody>
+                <tr><td>admin</td><td>Администратор системы</td><td><span class="badge badge-blue">Администратор</span></td><td><span class="badge badge-green">Активен</span></td></tr>
+                <tr><td>operator</td><td>Оператор учёта</td><td><span class="badge badge-blue">Оператор</span></td><td><span class="badge badge-green">Активен</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Резервное копирование</h3></div>
+          <div class="card-body" style="padding:20px">
+            <p style="margin-bottom:16px;font-size:14px">Создание резервной копии базы данных. Файл будет сохранён локально.</p>
+            <button class="btn btn-primary" onclick="doBackup()">💾 Создать резервную копию</button>
+            <button class="btn btn-outline" style="margin-left:10px" onclick="toast('Сжатие базы данных выполнено успешно')">🗜 Сжать базу данных</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ============ MODALS ============
+    function openModal(title, bodyHtml, footerHtml) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = bodyHtml;
+      document.getElementById('modal-footer').innerHTML = footerHtml;
+      document.getElementById('modal').classList.add('show');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+    function openAddTech() {
+      openModal('Добавление техники', `
+        <div class="form-row">
+          <div class="form-group"><label>Тип *</label>
+            <select id="f-type">${TYPES.map(t => `<option>${t}</option>`).join('')}</select>
+          </div>
+          <div class="form-group"><label>Модель *</label>
+            <input id="f-model" placeholder="Например: Dell OptiPlex 7090">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Серийный номер *</label>
+            <input id="f-serial" placeholder="Серийный номер">
+          </div>
+          <div class="form-group"><label>Дата покупки *</label>
+            <input type="date" id="f-date" value="2026-10-01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Стоимость, ₽ *</label>
+            <input type="number" id="f-price" placeholder="0">
+          </div>
+          <div class="form-group"><label>Кабинет *</label>
+            <select id="f-room">${ROOMS.map(r => `<option value="${r.id}">${r.num} — ${r.name}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="form-group"><label>МОЛ *</label>
+          <select id="f-mol">${MOLS.map(m => `<option value="${m.id}">${m.fio} (${m.post})</option>`).join('')}</select>
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-success" onclick="saveTech()">Сохранить</button>
+      `);
+    }
+
+    function saveTech() {
+      const type = document.getElementById('f-type').value;
+      const model = document.getElementById('f-model').value.trim();
+      const serial = document.getElementById('f-serial').value.trim();
+      const date = document.getElementById('f-date').value;
+      const price = parseInt(document.getElementById('f-price').value) || 0;
+      const room = parseInt(document.getElementById('f-room').value);
+      const mol = parseInt(document.getElementById('f-mol').value);
+      if (!model || !serial || !date) { toast('Заполните обязательные поля'); return; }
+      const item = {id: nextId++, inv: genInv(type, date, nextId-1), type, model, serial, date, price, room, mol, status:'В работе'};
+      tech.push(item);
+      saveData();
+      closeModal();
+      showPage('tech');
+      toast('Техника добавлена: ' + item.inv);
+    }
+
+    function viewTech(id) {
+      const t = techById(id);
+      if (!t) return;
+      openModal('Карточка техники — ' + t.inv, `
+        <table style="width:100%;font-size:14px">
+          <tr><td style="padding:8px 0;color:#7f8c8d;width:40%">Инвентарный номер</td><td><b>${t.inv}</b></td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Тип</td><td>${t.type}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Модель</td><td>${t.model}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Серийный номер</td><td>${t.serial}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Дата покупки</td><td>${t.date}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Стоимость</td><td>${(t.price||0).toLocaleString('ru-RU')} ₽</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Кабинет</td><td>${roomName(t.room)}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">МОЛ</td><td>${molName(t.mol)}</td></tr>
+          <tr><td style="padding:8px 0;color:#7f8c8d">Статус</td><td>${statusBadge(t.status)}</td></tr>
+        </table>
+      `, `<button class="btn btn-outline" onclick="closeModal()">Закрыть</button>`);
+    }
+
+    function openAddMove() {
+      const active = tech.filter(t => t.status === 'В работе');
+      openModal('Оформление перемещения', `
+        <div class="form-group"><label>Техника *</label>
+          <select id="m-tech">${active.map(t => `<option value="${t.id}">${t.inv} — ${t.model} (${roomName(t.room)})</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label>Новый кабинет *</label>
+          <select id="m-room">${ROOMS.map(r => `<option value="${r.id}">${r.num} — ${r.name}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label>Основание *</label>
+          <input id="m-basis" placeholder="Приказ / акт №...">
+        </div>
+        <div class="form-group"><label>Ответственный</label>
+          <input id="m-who" value="${currentUser ? currentUser.name : ''}">
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-success" onclick="saveMove()">Оформить</button>
+      `);
+    }
+
+    function saveMove() {
+      const techId = parseInt(document.getElementById('m-tech').value);
+      const to = parseInt(document.getElementById('m-room').value);
+      const basis = document.getElementById('m-basis').value.trim();
+      const who = document.getElementById('m-who').value.trim();
+      if (!basis) { toast('Укажите основание'); return; }
+      const t = techById(techId);
+      if (!t) return;
+      moves.push({id: moves.length+1, techId, date: new Date().toISOString().slice(0,10), from: t.room, to, basis, who});
+      t.room = to;
+      saveData();
+      closeModal();
+      showPage('moves');
+      toast('Перемещение оформлено');
+    }
+
+    function openAddRepair() {
+      const active = tech.filter(t => t.status !== 'Списан');
+      openModal('Заявка на ремонт', `
+        <div class="form-group"><label>Техника *</label>
+          <select id="r-tech">${active.map(t => `<option value="${t.id}">${t.inv} — ${t.model}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label>Описание неисправности *</label>
+          <textarea id="r-desc" rows="3" placeholder="Опишите проблему..."></textarea>
+        </div>
+        <div class="form-group"><label>Исполнитель</label>
+          <input id="r-who" placeholder="ФИО или организация">
+        </div>
+      `, `
+        <button class="btn btn-outline" onclick="closeModal()">Отмена</button>
+        <button class="btn btn-success" onclick="saveRepair()">Создать заявку</button>
+      `);
+    }
+
+    function saveRepair() {
+      const techId = parseInt(document.getElementById('r-tech').value);
+      const desc = document.getElementById('r-desc').value.trim();
+      const who = document.getElementById('r-who').value.trim() || 'Не указан';
+      if (!desc) { toast('Опишите неисправность'); return; }
+      const t = techById(techId);
+      if (t) t.status = 'В ремонте';
+      repairs.push({id: repairs.length+1, techId, start: new Date().toISOString().slice(0,10), end:'', desc, cost:0, who, status:'В работе'});
+      saveData();
+      closeModal();
+      showPage('repairs');
+      toast('Заявка на ремонт создана');
+    }
+
+    function doBackup() {
+      const data = {tech, moves, repairs, date: new Date().toISOString()};
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `backup_IS_UT_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      toast('Резервная копия создана и сохранена');
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // Enter on login
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+    });
+  </script>
+</body>
+</html>
